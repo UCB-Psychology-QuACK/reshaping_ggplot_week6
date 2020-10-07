@@ -1,0 +1,297 @@
+---
+#title: "ggplot_tutorial"
+#author: "Willa (adapted from Sam Cheyette, 2019"
+#date: "October 6th, 2020"
+output: pdf_document
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache=TRUE, fig.width=4, fig.height=3,fig.align = "center")
+
+library(tidyverse)
+
+```
+
+
+# ggplot tutorial
+
+<br>
+
+Lets make up some data
+(don't worry about this step)
+```{r}
+xval <- seq.int(1,40)
+yval <- xval + rnorm(40,0,5)
+
+data <- data.frame(xval,yval)
+
+head(data) #only shows first 6 rows
+
+```
+
+\pagebreak
+
+<br><br>
+
+Here's we can make a scatter plot:
+
+```{r}
+
+
+
+
+```
+
+<br><br>
+
+Or a line plot:
+
+```{r}
+
+
+
+
+```
+
+<br><br>
+
+How would you make a plot with both lines and points? 
+
+
+```{r}
+
+ 
+
+
+```
+
+<br><br>
+
+What about a bar plot? 
+
+note: there is a difference between geom_bar() and geom_col().
+geom_bar() gives you the count of a value in a column. geom_col() allows you to actually plot the values the contained in the column.
+
+```{r}
+
+
+
+
+```
+
+<br><br>
+
+### Adding a regression line
+
+
+
+You can also put regression lines on your plots by running the `geom_smooth()` function. This function takes a "method" argument for the kind of regression. Below, I used `method="lm"` to specify that it's a linear model.
+
+
+```{r}
+
+
+
+```
+
+<br><br>
+
+
+### Visualizing groups
+
+
+What if our data has *groups* or factors, and we want to visualize each group separately. 
+eg. we have multiple treatment groups with a single outcome measure.
+
+For this pretend data we are going to randomly assign groups 
+(again, ignore this step for now)
+
+<br><br>
+```{r}
+
+grp <- rnorm(nrow(data),0,1) > 0
+data$grp <- grp
+
+head(data)
+
+```
+
+<br><br>
+
+How would you want to do this on your plot? 
+We are going to show 2 common ways here. 
+
+```{r}
+
+
+
+
+```
+
+<br><br>
+
+
+
+
+```{r, fig.width=6,fig.height=3}
+ggplot(data=data, aes(x=xval,y=yval)) +
+      geom_point() +
+      geom_line() +
+      facet_wrap(~grp)
+
+
+
+```
+<br>
+
+### A couple other tips
+
+* To change the name of the x- and y-axis titles, use `xlab("x-axis name")` and `ylab("y-axis name")`.
+* To change the axis size use `xlim()` and `ylim()`
+
+```{r, fig.width=6,fig.height=3}
+ggplot(data=data, aes(x=xval,y=yval)) +
+      geom_point() +
+      geom_line() +
+      facet_wrap(~grp) +
+      xlab("my x axis") +
+      ylab ("my y axis") +
+      xlim(10,30)
+```
+      
+
+* To change stylistic aspects of the plot that are not related to the data, such as the text size, the color of the background, etc..., you can modify the "theme". If you wanted to increase the size of the x-axis text, you could write `theme(axis.text.x = element_text(size=___))`.
+
+```{r, fig.width=6,fig.height=3}
+ggplot(data=data, aes(x=xval,y=yval)) +
+      geom_point() +
+      geom_line() +
+      facet_wrap(~grp) +
+      xlab("my x axis") +
+      ylab ("my y axis") +
+      xlim(10,30)+
+      theme_classic()
+```
+
+
+* Check out the ggplot cheatsheet, which has a list of functions and when to use them: https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
+
+
+
+<br><br>
+
+## Your turn
+
+We're going to look at the built-in R dataset showing UC Berkeley admissions of men and women from 1973, broken down by department. It comes from a lawsuit alleging a gender bias in admissions. Here you're going to figure out: were UC Berkeley admissions biased? 
+
+```{r}
+data(UCBAdmissions)
+admit <- data.frame(UCBAdmissions)
+
+```
+
+
+First, let's just look at how many men and women applied in total.
+
+```{r}
+
+
+
+
+```
+
+Next, let's look at the proportion of admissions by gender.
+
+```{r}
+
+
+
+
+
+```
+
+Ugh, the default color scheme makes 'admission' red and 'rejected' green, which is counter-intuitive. So before we go any further let's fix that (hint: `use scale_fill_manual()`). You can find color names at http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf. 
+
+
+```{r}
+
+
+
+
+
+```
+
+
+
+
+Looks pretty biased, but it's kind of hard to compare, because the total number of men and women who applied is different --- so the bars are different heights. So let's turn these into proportions. 
+
+```{r}
+
+
+
+```
+
+
+
+Now plot the proportions:
+
+
+```{r}
+
+
+
+
+```
+
+Should we conclude that the admissions are biased? 
+
+Let's use the function *facet_wrap* to make subplots ("facets") for each department.
+
+```{r, fig.width=6,fig.height=3}
+
+
+
+
+
+
+
+```
+
+
+Again, because the total number of applicants of men and women varies by department, this is hard to interpret. So let's  turn each subplot into proportion instead of an overall frequency.
+
+```{r, fig.width=6,fig.height=3}
+
+
+
+```
+
+Now plot the proportions:
+
+```{r, fig.width=6,fig.height=3}
+
+
+
+```
+
+The data suddenly seem to tell an entirely different story. It seems that when you actually look at the proportion of men and women admitted to different departments, the rates of acceptance are essentially identical! This can be explained if women tend to apply to departments with lower acceptance rates. Let's demonstrate this a little more cleanly, by finding the proportion of women who applied to each department and plotting how selective those departments were overall.
+
+```{r}
+
+
+
+
+```
+
+So did women just apply to more selective departments?
+
+```{r}
+
+
+```
+
+
+That was the legal conclusion. See: https://en.wikipedia.org/wiki/Simpson%27s_paradox
